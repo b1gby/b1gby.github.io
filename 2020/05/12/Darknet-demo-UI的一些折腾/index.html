@@ -26,12 +26,12 @@
 <meta property="og:url" content="http://yoursite.com/2020/05/12/Darknet-demo-UI%E7%9A%84%E4%B8%80%E4%BA%9B%E6%8A%98%E8%85%BE/index.html">
 <meta property="og:site_name" content="Bigby&#39;s Blog">
 <meta property="og:description" content="Darknet demo UI　　由于yolo服创比赛需要出一个软件壳子，我们数据集、模型都训练完之后，没壳子，初赛马上截止了，就赶紧用python做个壳子出来吧~">
-<meta property="og:image" content="http://yoursite.com/2020/05/12/Darknet-demo-UI%E7%9A%84%E4%B8%80%E4%BA%9B%E6%8A%98%E8%85%BE/images/darknet-ui/blog-1.png">
+<meta property="og:image" content="http://yoursite.com/2020/05/12/Darknet-demo-UI%E7%9A%84%E4%B8%80%E4%BA%9B%E6%8A%98%E8%85%BE/blog-1.png">
 <meta property="article:published_time" content="2020-05-12T17:11:15.000Z">
-<meta property="article:modified_time" content="2020-05-18T09:10:21.350Z">
+<meta property="article:modified_time" content="2020-05-18T09:16:19.582Z">
 <meta property="article:author" content="Bigby">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/2020/05/12/Darknet-demo-UI%E7%9A%84%E4%B8%80%E4%BA%9B%E6%8A%98%E8%85%BE/images/darknet-ui/blog-1.png">
+<meta name="twitter:image" content="http://yoursite.com/2020/05/12/Darknet-demo-UI%E7%9A%84%E4%B8%80%E4%BA%9B%E6%8A%98%E8%85%BE/blog-1.png">
 
 <link rel="canonical" href="http://yoursite.com/2020/05/12/Darknet-demo-UI%E7%9A%84%E4%B8%80%E4%BA%9B%E6%8A%98%E8%85%BE/">
 
@@ -185,7 +185,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-05-18 09:10:21" itemprop="dateModified" datetime="2020-05-18T09:10:21+00:00">2020-05-18</time>
+                <time title="Modified: 2020-05-18 09:16:19" itemprop="dateModified" datetime="2020-05-18T09:16:19+00:00">2020-05-18</time>
               </span>
 
           
@@ -230,7 +230,7 @@
 <p>　　翻译下，gi.repository是为了支持GObject库的Python模块，用了它就可以用GTK、Gstreamer等等。<del>gi是不是译为<code>Gobject interface</code>啊？！！hhhhhh</del><br>　　小结一下：要在Python里面使用GTK开发工具，要引入<code>gi.repository</code>，GTK开发工具使用的是GObject库，GObject库和GTK开发工具也是Ubuntu等GNOME桌面环境的基石。最后加<code>Py</code>的都是在Python环境下的！  </p>
 <h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><p>　　结构很简单，总共就两个文件，一个<code>interface.py</code>用于做GUI界面，另一个<code>threadProgress.py</code>创建新线程处理darknet命令行。</p>
 <h3 id="界面布局"><a href="#界面布局" class="headerlink" title="界面布局"></a>界面布局</h3><p>　　界面布局什么的就不多讲啦。大概就是下面这样子：  </p>
-<p><img src="images/darknet-ui/blog-1.png" alt="处理图片GUI界面"></p>
+<p><img src="/2020/05/12/Darknet-demo-UI%E7%9A%84%E4%B8%80%E4%BA%9B%E6%8A%98%E8%85%BE/blog-1.png" alt="处理图片GUI界面"></p>
 <p>　　右上是选择文件菜单，用<code>Gtk.Menu()</code>、<code>Gtk.MenuBar()</code>和<code>Gtk.MenuItem()</code>实现；选择文件菜单下面是输入图片预览，用<code>Gtk.Image()和GdkPixbuf()</code>实现；右下是一个开始处理的”Start Progress”按钮；左上是输出图片预览，同理，用<code>Gtk.Image()和GdkPixbuf()</code>实现；左下是输出信息log，将运行darknet是产生的log显示在GUI界面中。  </p>
 <h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><h4 id="选择文件菜单的实现"><a href="#选择文件菜单的实现" class="headerlink" title="选择文件菜单的实现"></a>选择文件菜单的实现</h4><p>　　选择文件菜单使用的是Gtk中提供的固定组件<code>Menu()</code>、<code>MenuBar()</code>和<code>MenuItem()</code>，通过以下语句绑定选择文件和退出的函数：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">filechoosermenu = Gtk.MenuItem(label=<span class="string">"Choose Image"</span>)</span><br><span class="line">filechoosermenu.connect(<span class="string">"activate"</span>, self.get_file_chooser_dialog)</span><br><span class="line">menu.append(filechoosermenu)</span><br><span class="line"></span><br><span class="line">quitmenu = Gtk.MenuItem(label=<span class="string">"Quit (ALt+F4)"</span>)</span><br><span class="line">quitmenu.connect(<span class="string">"activate"</span>, self.all_quit)</span><br><span class="line">menu.append(quitmenu)</span><br></pre></td></tr></table></figure>
