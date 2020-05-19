@@ -106,6 +106,9 @@
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pix=GdkPixbuf.Pixbuf.new_from_file_at_scale(self.outputpath,<span class="number">550</span>,<span class="number">700</span>,<span class="literal">True</span>)</span><br><span class="line">self.imageoutput.set_from_pixbuf(pix)</span><br></pre></td></tr></table></figure>
 
 <h2 id="关于视频接口"><a href="#关于视频接口" class="headerlink" title="关于视频接口"></a>关于视频接口<!--more--></h2>]]></content>
+      <categories>
+        <category>yolo服创竞赛</category>
+      </categories>
   </entry>
   <entry>
     <title>夫人的暑期实习面经</title>
@@ -228,5 +231,8 @@
 <h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>&emsp;&emsp;相比百度那边的面试，能加到HR的微信，有一个可以问进度人，就会好一些。<br>&emsp;&emsp;我同学是字节提前批，他说他面试基本上跟面经上写的一模一样。我正式批，看了很多面经，感觉，不太一样吧，没有他说的那么简单啦。<br>&emsp;&emsp;字节对项目也问的很细，相比起来百度那边就随便问了问，字节这边会沿着你的项目往里深挖，所以自己做过的项目得真的弄懂。</p>
 <h2 id="关于测开"><a href="#关于测开" class="headerlink" title="关于测开"></a>关于测开</h2><p>&emsp;&emsp;我是接了字节HR电话才知道，字节这边的测开（印象中他好像说百度也是）是其他公司的研发岗，测试是其他公司的测开岗，他们的纯测试外包给了别人。所以在准备面试的时候，还得去查查该公司职位的具体对应的工作，不然就很尴尬。<br>&emsp;&emsp;面试官那边推荐在校想做测开的可以去多看看国外IT公司写的测开的书，比如谷歌的《Goole软件测试之道》等等。<br>&emsp;&emsp;像面试中会被问到计网、操作系统、数据库、linux、程序设计等，得准备起来。背起来还挺快的。<br>&emsp;&emsp;反正就莫名其妙就做了测开吧。祝大家早日上岸。</p>
 ]]></content>
+      <categories>
+        <category>面经</category>
+      </categories>
   </entry>
 </search>
