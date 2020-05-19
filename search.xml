@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Darknet demo UI的一些折腾</title>
+    <url>/2020/05/12/Darknet-demo-UI%E7%9A%84%E4%B8%80%E4%BA%9B%E6%8A%98%E8%85%BE/</url>
+    <content><![CDATA[<h1 id="Darknet-demo-UI"><a href="#Darknet-demo-UI" class="headerlink" title="Darknet demo UI"></a><center>Darknet demo UI</center></h1><p>　　由于yolo服创比赛需要出一个软件壳子，我们数据集、模型都训练完之后，没壳子，初赛马上截止了，就赶紧用python做个壳子出来吧~</p>
+<center><video src="/videos/video2_test.mp4" type="video/mp4" controls="controls" preload="auto" width="80%" height="80%" autoplay="autoplay">
+</video></center><a id="more"></a>  
+
+<h2 id="别人的GUI壳子——可以处理darknet图片的壳子"><a href="#别人的GUI壳子——可以处理darknet图片的壳子" class="headerlink" title="别人的GUI壳子——可以处理darknet图片的壳子"></a>别人的GUI壳子——可以处理darknet图片的壳子</h2><p>　　参考github <a href="https://github.com/utkudarilmaz/DarkNet-Interface" target="_blank" rel="noopener">https://github.com/utkudarilmaz/DarkNet-Interface</a>  </p>
+<h3 id="一些奇奇怪怪的库的辛酸解释"><a href="#一些奇奇怪怪的库的辛酸解释" class="headerlink" title="一些奇奇怪怪的库的辛酸解释"></a>一些奇奇怪怪的库的辛酸解释</h3><p>　　github上的代码是用gi.repository中的GTK,可以看看下面的import</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gi</span><br><span class="line"></span><br><span class="line">gi.require_version(<span class="string">'Gtk'</span>, <span class="string">'3.0'</span>)</span><br><span class="line"><span class="keyword">from</span> gi.repository <span class="keyword">import</span> Gtk, GdkPixbuf</span><br><span class="line"><span class="keyword">from</span> gi.repository <span class="keyword">import</span> GObject</span><br></pre></td></tr></table></figure>
+<p>　　没学过嘛，就自己google了下，看了一中午，总算大概搞懂这些是啥意思了，如果有理解错误，多谢指正！<br>　　几个词：Gobject、gi.repository、GTK+(GTK)、PyGTK、GNOME.<br>　　首先Gobject：</p>
+<blockquote>
+<p>Gobject from wikipedia：GLib对象系统，或者说GObject，是一个在LGPL下发布的自由软件库，它提供了一个轻便的对象系统并支持透明的多语言互通。<br>　　(<del>划重点</del>)<u>GObject仅依赖于GLib和libc。它是GNOME的基石并且在GTK+，Pango，Accessibility Toolkit和大多数GNOME的高级库和应用程序中被广泛使用。</u>在GTK+ 2.0之前，GObject代码是GTK+的一部分。（现在GObject这个名字已经不在GTK+中了──取代它的基本类型叫做GtkObject。）</p>
+</blockquote>
+<p>　　可以看到，GObject是GNOME的基石，并广泛运用到GTK+.<br>　　那么什么是GNOME呢? </p>
+<blockquote>
+<p>GNOME from wikipedia：GNOME是一个完全由自由软件组成的桌面环境。它的目标操作系统是Linux，但是大部分的BSD系统亦支持GNOME。<br>　　GNOME最初是GNU网络对象模型环境（GNU Network Object Model Environment）的缩写，但是已经被废弃了。是GNU计划的一部分，并且是由志愿者开发的。</p>
+</blockquote>
+<p>　　GNU计划简单讲就是自由软件协作计划(<del>这个大家可以去查查历史啦</del>)。也就是说大家经常使用的Ubuntu、Debian等桌面环境都是GNOME环境，一提到Ubuntu、Debian可能就会想到GNOME了吧。<br>　　可以简单看看GNOME和GTK+的渊源：</p>
+<blockquote>
+<p>最早的GNOME 1(现在已经GNOME 3了)：1996年KDE发布，但KDE所依赖的Qt当时并未使用GPL许可。出于这种考虑，两个项目在1997年8月发起：一个是作为Qt库替代品的“Harmony”，另外一个就是创建一个基于非Qt库的桌面系统，即GNOME项目。<br>　　GIMP Toolkit（GTK+）被选中做为Qt toolkit的替代，担当GNOME桌面的基础。<u>GTK+使用LGPL</u>，允许链接到此库的软件（例如GNOME的应用程序）使用任意的许可协议。GNOME计划的应用程序通常使用GPL许可证。</p>
+</blockquote>
+<p>　　看到”GTK+使用LGPL”，就是上面GObject提到的LGPL，来看看GTK+(GTK):  </p>
+<blockquote>
+<p>GTK+ from wikipedia：GTK（原名GTK+）最初是GIMP的专用开发库（GIMP Toolkit），后来发展为Unix-like系统下开发图形界面的应用程序的主流开发工具之一。GTK是自由软件，并且是GNU计划的一部分。自2019年2月6日起，GTK+改名为GTK。<br>　　GNOME是以GTK为基础，就是说为GNOME编写的程序使用GTK做为其工具箱。<br>　　GTK使用C语言开发，但是其设计者使用面向对象技术。也提供了C++（gtkmm）、Perl、Ruby、Java和Python（PyGTK）绑定，其他的绑定有Ada、D、Haskell、PHP和所有的.NET编程语言。</p>
+</blockquote>
+<p>　　也就是说GTK+为开发图形界面的主流开发工具，look look PyGTK：</p>
+<blockquote>
+<p>PyGTK from wikipedia：PyGTK是一套用Python封装的，用于GTK+的GUI库。</p>
+</blockquote>
+<p>　　so……用它就对了。<br>　　那GTK就GTK呗，还要gi干啥，在网上找了半天，没看到gi的官方解释，找了一个askUbuntu的：</p>
+<blockquote>
+<p><code>gi.repository</code> is the Python module for PyGObject (which stands for Python <code>GObject</code> introspection) which holds Python bindings and support for the GTK+ 3 toolkit and for the GNOME apps.<br>　　See <a href="https://wiki.gnome.org/Projects/PyGObject" target="_blank" rel="noopener">Projects/PyGObject on the GNOME Wiki</a>.</p>
+</blockquote>
+<p>　　翻译下，gi.repository是为了支持GObject库的Python模块，用了它就可以用GTK、Gstreamer等等。<del>gi是不是译为<code>Gobject interface</code>啊？！！hhhhhh</del><br>　　小结一下：要在Python里面使用GTK开发工具，要引入<code>gi.repository</code>，GTK开发工具使用的是GObject库，GObject库和GTK开发工具也是Ubuntu等GNOME桌面环境的基石。最后加<code>Py</code>的都是在Python环境下的！  </p>
+<h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><p>　　结构很简单，总共就两个文件，一个<code>interface.py</code>用于做GUI界面，另一个<code>threadProgress.py</code>创建新线程处理darknet命令行。</p>
+<h3 id="界面布局"><a href="#界面布局" class="headerlink" title="界面布局"></a>界面布局</h3><p>　　界面布局什么的就不多讲啦。大概就是下面这样子：  </p>
+<p><img src="/2020/05/12/Darknet-demo-UI%E7%9A%84%E4%B8%80%E4%BA%9B%E6%8A%98%E8%85%BE/blog-1.png" alt="处理图片GUI界面"></p>
+<p>　　右上是选择文件菜单，用<code>Gtk.Menu()</code>、<code>Gtk.MenuBar()</code>和<code>Gtk.MenuItem()</code>实现；选择文件菜单下面是输入图片预览，用<code>Gtk.Image()和GdkPixbuf()</code>实现；右下是一个开始处理的”Start Progress”按钮；左上是输出图片预览，同理，用<code>Gtk.Image()和GdkPixbuf()</code>实现；左下是输出信息log，将运行darknet是产生的log显示在GUI界面中。  </p>
+<h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><h4 id="选择文件菜单的实现"><a href="#选择文件菜单的实现" class="headerlink" title="选择文件菜单的实现"></a>选择文件菜单的实现</h4><p>　　选择文件菜单使用的是Gtk中提供的固定组件<code>Menu()</code>、<code>MenuBar()</code>和<code>MenuItem()</code>，通过以下语句绑定选择文件和退出的函数：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">filechoosermenu = Gtk.MenuItem(label=<span class="string">"Choose Image"</span>)</span><br><span class="line">filechoosermenu.connect(<span class="string">"activate"</span>, self.get_file_chooser_dialog)</span><br><span class="line">menu.append(filechoosermenu)</span><br><span class="line"></span><br><span class="line">quitmenu = Gtk.MenuItem(label=<span class="string">"Quit (ALt+F4)"</span>)</span><br><span class="line">quitmenu.connect(<span class="string">"activate"</span>, self.all_quit)</span><br><span class="line">menu.append(quitmenu)</span><br></pre></td></tr></table></figure>
+
+<p>　　look look function <code>get_file_chooser_dialog()</code>:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_file_chooser_dialog</span><span class="params">(self, widget)</span>:</span></span><br><span class="line">    filechooserdialog = Gtk.FileChooserDialog(title=<span class="string">"Choose your input image! "</span>)</span><br><span class="line">    filechooserdialog.set_action(<span class="number">0</span>)</span><br><span class="line">    filechooserdialog.add_button(<span class="string">"_Open"</span>, Gtk.ResponseType.OK)</span><br><span class="line">    filechooserdialog.add_button(<span class="string">"_Cancel"</span>, Gtk.ResponseType.CANCEL)</span><br><span class="line">    filechooserdialog.set_default_response(Gtk.ResponseType.OK)</span><br><span class="line">    response = filechooserdialog.run()</span><br><span class="line">    <span class="keyword">if</span> response == Gtk.ResponseType.OK:</span><br><span class="line">        self.filechooserbutton.set_filename(filechooserdialog.get_filename())</span><br><span class="line">        pixinput = GdkPixbuf.Pixbuf.new_from_file_at_size(self.filechooserbutton.get_filename(), <span class="number">275</span>, <span class="number">425</span>)</span><br><span class="line">        self.imageinput.set_from_pixbuf(pixinput)</span><br><span class="line">        self.choosenimage = filechooserdialog.get_filename()</span><br><span class="line">    filechooserdialog.destroy()</span><br></pre></td></tr></table></figure>
+
+<p>　　函数实现的功能为：选择图片，如果response回应为<code>OK</code>，说明点击确定按钮，之后将文件源赋给imageinput，即输入图片预览区域，并设置全局变量<code>self.choosenimage = filechooserdialog.get_filename()</code>.<br>　　除了这个用于设置输入图片源之外，还有一个<code>self.filechooserbutton</code> </p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.filechooserbutton = Gtk.FileChooserButton(title=<span class="string">"Choose your input image! "</span>)</span><br><span class="line">self.filechooserbutton.set_action(<span class="number">0</span>)</span><br><span class="line">self.filechooserbutton.connect(<span class="string">"file-set"</span>, self.file_changed)</span><br><span class="line">self.filechooserbutton.set_width_chars(<span class="number">15</span>)</span><br><span class="line">self.vBoxview.pack_start(self.filechooserbutton, <span class="literal">False</span>, <span class="literal">False</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<p>　　它与<code>self.menubar</code>被设置为同一地方，所以点击选择文件菜单时，会同时点击<code>self.filechooserbutton</code>和<code>self.menubar</code>，即会调用两个函数，一个是上面的<code>get_file_chooser_dialog()</code>，还有一个是<code>file_changed()</code>。  </p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">file_changed</span><span class="params">(self, widget)</span>:</span></span><br><span class="line">    pix = GdkPixbuf.Pixbuf.new_from_file_at_size(self.filechooserbutton.get_filename(), <span class="number">275</span>, <span class="number">425</span>)</span><br><span class="line">    self.imageinput.set_from_pixbuf(pix)</span><br><span class="line">    self.choosenimage = self.filechooserbutton.get_filename()</span><br></pre></td></tr></table></figure>
+
+<p>　　<code>file_changed()</code>会直接访问<code>filechooserbutton.get_filename()</code>，在<code>get_file_chooser_dialog()</code>调用之后，<code>get_filename()</code>函数才会有值。<br>　　总结一下，虽然点击文件选择菜单时会同时调用两个函数<code>get_file_chooser_dialog()</code>和<code>file_changed()</code>，但<code>get_file_chooser_dialog()</code>会被先调用，将输入源赋给<code>self.filechooserbutton</code>，之后再去调用<code>file_changed()</code>函数。上述实现了第一次选择输入源文件和第一次后多次改变输入源文件的功能。</p>
+<h4 id="显示图片——Pixbuf的应用"><a href="#显示图片——Pixbuf的应用" class="headerlink" title="显示图片——Pixbuf的应用"></a>显示图片——Pixbuf的应用</h4><p>　　在上述实现选择文件时，也可以看到其中Pixbuf的应用：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pix = GdkPixbuf.Pixbuf.new_from_file_at_size(self.filechooserbutton.get_filename(), <span class="number">275</span>, <span class="number">425</span>)</span><br><span class="line">self.imageinput.set_from_pixbuf(pix)</span><br></pre></td></tr></table></figure>
+
+<p>　　在写这段Pixbuf时，感谢CSDN上的博主sanxiaochengyu，以及其一系列关于PyGObject的博客，其中Pixbuf参考了<a href="https://blog.csdn.net/a87b01c14/article/details/52096165" target="_blank" rel="noopener">PyGobject（八十四）GdkPixbuf.Pixbuf</a>  </p>
+<blockquote>
+<p>Pixbuf: 这是gdk-pixbuf库的主要结构。它被用于表示图像。它包含关于图像的像素数据、宽度和高度等信息。</p>
+</blockquote>
+<p>　　如何获得图片信息的buf呢，上述博客中给出了一系列函数，这边就不详细列出了。<br>　　在获取到图片信息的buf之后，只需要将<code>Gtk.Image()</code>之类的对象，使用<code>set_from_pixbuf()</code>函数既可以设置，输入参数填写上面获得的buf。</p>
+<h4 id="Darknet处理图片——多线程命令行运行"><a href="#Darknet处理图片——多线程命令行运行" class="headerlink" title="Darknet处理图片——多线程命令行运行"></a>Darknet处理图片——多线程命令行运行</h4><p>　　“Start Progress”按钮GUI界面的设计：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.runbutton = Gtk.Button.new_with_label(<span class="string">"Start Progress"</span>)</span><br><span class="line">fixedRunButton = Gtk.Fixed()</span><br><span class="line">self.vBoxview.pack_start(fixedRunButton, <span class="literal">True</span>, <span class="literal">True</span>, <span class="number">0</span>)</span><br><span class="line">fixedRunButton.put(self.runbutton, <span class="number">100</span>, <span class="number">450</span>)</span><br><span class="line">self.runbutton.connect(<span class="string">"clicked"</span>, self.on_click_run_button)</span><br></pre></td></tr></table></figure>
+
+<p>　　在点击”Start Progress”按钮后，运行<code>on_click_run_button()</code>函数。<br>　　首先使用<code>os.chdir(&quot;../darknet/&quot;)</code>切换到上一级目录的darknet文件夹中.<br>　　随后调用ThreadProgress的类，并运行处理程序：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">progress = ThreadProgress(self.imageoutput, self.spinner, command, self.path, self.textBuffer)</span><br><span class="line">progress.start()</span><br></pre></td></tr></table></figure>
+
+<p>　　运行处理程序需要输出图片<code>self.imageoutput</code>、命令<code>command</code>、当前路径<code>self.path</code>和输出信息<code>self.textBuffer</code>。<br>　　command使用：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">command = <span class="string">"./darknet detector test cfg/voc.data cfg/yolov3.cfg yolov3.weights "</span> + self.choosenimage</span><br></pre></td></tr></table></figure>
+<p>　　传入要执行的命令后，在threadProgress中使用Popen创建新进程，创建命令行并执行输入的command命令，在处理之前创建文件tmpout，读取命令行中的输出log信息。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">tmpWrite = open(<span class="string">"tmpout"</span>, <span class="string">"wb"</span>)</span><br><span class="line"></span><br><span class="line">process=Popen(args, cwd=self.path, stdout = tmpWrite, stderr = tmpWrite, bufsize = <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">process.wait()</span><br><span class="line"></span><br><span class="line">tmpWrite.close()</span><br></pre></td></tr></table></figure>
+
+<p>　　执行命令之后，使用<code>process.wait()</code>等待命令行执行结束，并读取目录中的tmpout文件，将其显示在textBuffer内容中。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">f=open(<span class="string">"tmpout"</span>,<span class="string">"r"</span>)</span><br><span class="line">self.textBuffer.set_text(f.read())</span><br><span class="line">f.close()</span><br></pre></td></tr></table></figure>
+
+<p>　　读取目录中的<code>predictions.jpg</code>文件，并使用Pixbuf将其作为图片源显示在imageoutput.  </p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pix=GdkPixbuf.Pixbuf.new_from_file_at_scale(self.outputpath,<span class="number">550</span>,<span class="number">700</span>,<span class="literal">True</span>)</span><br><span class="line">self.imageoutput.set_from_pixbuf(pix)</span><br></pre></td></tr></table></figure>
+
+<h2 id="关于视频接口"><a href="#关于视频接口" class="headerlink" title="关于视频接口"></a>关于视频接口<!--more--></h2>]]></content>
+  </entry>
+  <entry>
+    <title>SCAD-tips</title>
+    <url>/2020/05/13/SCAD-tips/</url>
+    <content><![CDATA[<h1 id="Some-interesting-videos-and-blogs-from-course-SCAD"><a href="#Some-interesting-videos-and-blogs-from-course-SCAD" class="headerlink" title="Some interesting videos and blogs from course SCAD!"></a><center>Some interesting videos and blogs from course SCAD!</center></h1><h2 id="Videos"><a href="#Videos" class="headerlink" title="Videos"></a>Videos</h2><ul>
+<li><a href="https://www.bilibili.com/video/BV1us411z7X4?from=search&seid=8989613589792752819" target="_blank" rel="noopener">The code</a></li>
+<li><a href="https://www.bilibili.com/video/BV1ez411b7KU?from=search&seid=14454307307681453541" target="_blank" rel="noopener">二叉树之舞</a></li>
+<li><a href="https://www.bilibili.com/video/BV1ua4y1t7kX?from=search&seid=149338560305469863" target="_blank" rel="noopener">当两个实习生结对编程的时候</a></li>
+<li><a href="https://www.bilibili.com/video/BV1ck4y1o7r9?from=search&seid=10794270339927835597" target="_blank" rel="noopener">我怀疑他是故意的</a></li>
+<li><a href="https://www.bilibili.com/video/BV1d541147CP?from=search&seid=2027458588213310015" target="_blank" rel="noopener">你不是一个人</a><a id="more"></a>
+<h2 id="黑板项目"><a href="#黑板项目" class="headerlink" title="黑板项目"></a>黑板项目</h2></li>
+</ul>
+<ul>
+<li><a href="https://www.reddit.com/r/place/" target="_blank" rel="noopener">REDDIT</a></li>
+</ul>
+<h2 id="Blogs"><a href="#Blogs" class="headerlink" title="Blogs"></a>Blogs</h2><h3 id="蛤乎"><a href="#蛤乎" class="headerlink" title="蛤乎"></a>蛤乎</h3><ul>
+<li><p><a href="https://zhuanlan.zhihu.com/p/137642882?utm_source=wechat_session&utm_medium=social&utm_oi=27436091703296" target="_blank" rel="noopener">在《我的世界》里搭建神经网络，运行过程清晰可见 | 开源</a></p>
+</li>
+<li><p><a href="https://zhuanlan.zhihu.com/p/129073798?utm_source=wechat_session&utm_medium=social&utm_oi=27436091703296" target="_blank" rel="noopener">文档代码化： 如何重塑软件开发的文档体验</a></p>
+</li>
+<li><p><a href="https://zhuanlan.zhihu.com/p/133499009?utm_source=wechat_session&utm_medium=social&utm_oi=27436091703296" target="_blank" rel="noopener">又一开源神器诞生：可快速在 iOS 设备上跑 Windows、Linux 等操作系统！</a></p>
+</li>
+<li><p><a href="https://zhuanlan.zhihu.com/p/137782049?utm_source=wechat_session&utm_medium=social&utm_oi=27436091703296" target="_blank" rel="noopener">一位中国博士把整个CNN都给可视化了，可交互有细节，每次卷积ReLU池化都清清楚楚</a></p>
+</li>
+<li><p><a href="https://zhuanlan.zhihu.com/p/121798647?utm_source=wechat_session&utm_medium=social&utm_oi=27436091703296" target="_blank" rel="noopener">打造舒适的macOS生产力环境</a></p>
+</li>
+</ul>
+]]></content>
+  </entry>
+  <entry>
+    <title>夫人的暑期实习面经</title>
+    <url>/2020/05/14/%E5%A4%AB%E4%BA%BA%E7%9A%84%E6%9A%91%E6%9C%9F%E5%AE%9E%E4%B9%A0%E9%9D%A2%E7%BB%8F/</url>
+    <content><![CDATA[<h1 id="夫人的暑期实习面经"><a href="#夫人的暑期实习面经" class="headerlink" title="夫人的暑期实习面经"></a><center>夫人的暑期实习面经</center></h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>　　本人本科大三，人工智能系，在校期间参加过部分神经网络的项目。<br>　　于3月底开始准备投递简历，起先投递机器学习相关职位。不久收到阿里小哥的电话面试，当然没过，小哥苦口婆媳的劝我读研，告诉我本科AI岗多难多难，也切实给了我很多实质性的建议。<del>(小哥哥人真好)</del>。前前后后机器学习的都没过，开始迷茫，跟舍友、同学聊了以后放弃机器学习，改投测试开发。<a id="more"></a><br>　　这里给跟我一样的本科同学一个建议，<del>(ACM大佬等可以滤掉这条建议)</del>。人工智能确实很热门，但因为目前AI的应用属实不太多，所以大企业里面AI岗招的人很少，也大多做算法研究类工作，因此会对学历、竞赛以及paper等的要求很高，不是我们这种做了个把项目，自以为很懂机器学习的本科小孩能随随便便进的。可以冲一冲，最好最两手准备吧。<br>　　我因为不知情，错过了提前批，面试那些比提前批的同学过的苦。找实习、找工作的同学最好留意一下提前批的消息。还有就是内推码，会让笔试面试的流程走得更快一些。</p>
+<h2 id="关于笔试"><a href="#关于笔试" class="headerlink" title="关于笔试"></a>关于笔试</h2><p>　　我做了百度、美团、拼多多、网易、华为的笔试。字节没有笔试。<br>　　今年因为阿里是部门分开招聘，所以不走官网的话就没有笔试。但我是后来才知道的，就……没有管阿里那边了。<br>　　我自认为百度的笔试最难，会考基础题，以选择题的形式呈现。涵盖了编译原理、C、概统、操作系统、Linux、机器学习、数据挖掘等等，然后是两道编程题。一共两小时。我考了两次，<del>(因为之前报错了批次)</del>，百度比较爱出跟排列组合有关的编程题，这些题像牛客等网站上有类似的题，可以拿来刷。<br>　　其他公司就是纯编程题了，一般是两小时3题的题量，大多偏爱于考字符串类的题。每个题都会标明分值，一般分值乘上ac的百分比的和到了60%差不多笔试就过了，不算难，输入输出要注意一下。<br>　　百度、美团、拼多多、华为笔试过了以后会给性格测试题，阿里走官网的话也会有性格测试。<br>　　性格测试题一般不限时间，但像华为跟阿里最后会有阅读理解和找规律的题，会有时间限制。百度的性格测试比较普通，就场景题选择，<del>(小学生政治题)</del>。还有一种性格测试类型是从3个标签里面选择你觉得与你性格最像和最不像的，都是一些积极的词语。像华为的就是给一系列的标签，从非常符合到非常不符合选择符合程度，符合程度一样的再挑出来像第二种那样选择最像你和最不像你的标签。<br>　　像这种就得有耐心吧，因为题量特别多。然后尽量诚实，因为前后可能会有一样或者类似的题。</p>
+<h2 id="百度"><a href="#百度" class="headerlink" title="百度"></a>百度</h2><p>　　百度是3月底考的笔试，隔了好久告诉我笔试过了，让我性格测试，然后19号面试。百度的面试是像吃饭排号那种，还挺有趣，如果过了的话会通知你继续进行下一面。<br>　　因为一二三面是下午一起的，就没按一二三面分类。<br>　　百度这边一二三面没有很明确的分开。一面偏基础一点，二面偏思维一点，三面偏性格一点。每面都会掺杂一些基础题。都有代码题。测试大头在二面问的，会引导你去思考更深一步的内容，考验思维能力。</p>
+<h3 id="基础部分"><a href="#基础部分" class="headerlink" title="基础部分"></a>基础部分</h3><ol>
+<li>TCP与UDP的区别</li>
+<li>TCP怎么保证可靠交付</li>
+<li>怎么用UDP实现可靠交付</li>
+<li>HTTP和HTTPS的区别</li>
+<li>慢开始，以及目的</li>
+<li>进程和线程的区别</li>
+<li>进程间通信的方法</li>
+<li>进程间为什么要通信</li>
+<li>进程调度的方法</li>
+<li>浅拷贝和深拷贝的区别</li>
+<li>数组和链表的区别</li>
+<li>对多态的理解</li>
+<li>堆和栈的区别</li>
+<li>有没有在写代码的时候遇到过栈溢出？</li>
+<li>死锁的必要条件</li>
+<li>静态成员对象什么时候初始化</li>
+<li>函数的静态成员什么时候初始化</li>
+<li>DHCP</li>
+<li>给一个大数据，不限方法，不限时间，找到重复的数据，方法越多越好</li>
+<li>ARP欺骗 </li>
+<li>沙盒</li>
+<li>Explicit </li>
+<li>int(*fun)(int)</li>
+<li>Python中用过的库</li>
+<li>索引有用过吗</li>
+<li>socket</li>
+<li>有没有自己写过C++的库</li>
+</ol>
+<h3 id="代码部分"><a href="#代码部分" class="headerlink" title="代码部分"></a>代码部分</h3><ol>
+<li>删除倒数第k个结点（考虑特殊情况，不满k个，刚好k个，k异常，结点异常）</li>
+<li>SQL查找+排序+返回第一个</li>
+<li>判断回文数字</li>
+<li>非递归实现二分查找</li>
+</ol>
+<h3 id="测试部分"><a href="#测试部分" class="headerlink" title="测试部分"></a>测试部分</h3><ol>
+<li>黑盒白盒</li>
+<li>输入框测试</li>
+<li>语音输入法测试</li>
+<li>测试工具</li>
+</ol>
+<h3 id="项目-amp-学生工作"><a href="#项目-amp-学生工作" class="headerlink" title="项目&amp;学生工作"></a>项目&amp;学生工作</h3><p>（我有担任过外联部的部长）</p>
+<ol>
+<li>遇到的问题，解决办法</li>
+<li>担当的职责</li>
+<li>学到的东西</li>
+<li>学生工作遇到的问题，解决办法</li>
+<li>学生工作学到的东西</li>
+<li>怎么鼓励部员</li>
+<li>怎么带领他们</li>
+<li>有没有遇到刁难的商家并且解决了</li>
+</ol>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ol>
+<li>优缺点</li>
+<li>想坚持下来没有坚持下来的事情</li>
+<li>想坚持下来并且坚持下来的事情</li>
+<li>为什么坚持下来</li>
+<li>5L、6L的水桶装3L的水</li>
+<li>理想的工作的样子</li>
+<li>对未来职业的规划</li>
+<li>如果现在突然没网了怎么办？你怎么知道没网？（没听懂什么意思）</li>
+</ol>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>　　我一连三面挺顺利的，我还以为我过了呢。<del>以至于十分大胆的鸽了网易的面试和腾讯的笔试</del>。那时候说的是两周左右给回复，现在都快一个月了，没有通知我挂了还是过了（大概是挂了吧哈哈哈）。<br>　　面试体验还挺好，一三面小姐姐，二面小哥哥，都挺温柔。二面的时候有一些东西我确实不会，小哥哥说没事，最后还说我基础挺好的之类。相比字节来说，百度回应的流程有点慢，笔试的通知和面试的通知都是，<del>(不过也可能是因为我不够优秀)</del>。</p>
+<h2 id="字节"><a href="#字节" class="headerlink" title="字节"></a>字节</h2><p>　　字节一二三面是分开的，照理说字节的面试流程应该是很快的，但我运气比较好，被面试官鸽了好几次，就拖了很久。<br>　　字节没有笔试，因为特殊原因，加了一个HR小姐姐的微信，就可以及时知道自己的面试状态，还挺好的。正式批相比于提前批的话，人比较多，所以会慢一些。面试官见得人也多啦，要求也相应的会高一些吧。<br>　　字节这边一二三面的层次就分的十分清楚。一面是基础，二面偏思维，三面偏综合之类的，没有很多交叉，我觉得这种层次设计的就挺好，让人觉得很正式。</p>
+<h3 id="字节一面"><a href="#字节一面" class="headerlink" title="字节一面"></a>字节一面</h3><ol>
+<li>项目</li>
+<li>http格式</li>
+<li>虚函数</li>
+<li>重载的几种方式</li>
+<li>进程和线程</li>
+<li>C/C++写进程</li>
+<li>数据库子类</li>
+<li>代码 找到数组中超过半数的数</li>
+<li>输入的数组数据没有超过半数的数怎么办</li>
+<li>测试你的代码</li>
+</ol>
+<h3 id="字节二面"><a href="#字节二面" class="headerlink" title="字节二面"></a>字节二面</h3><ol>
+<li>项目</li>
+<li>i++跟++i的区别（底层实现）</li>
+<li>i = 0是全局变量，有两个并发的线程，各i++100次，问i的值，以及为什么</li>
+<li>B树跟B+的区别</li>
+<li>B+树的插入</li>
+<li>数据库的底层是B树还是B+树</li>
+<li>TCP可靠传输</li>
+<li>TCP的拥塞控制机制</li>
+<li>找log文件里面的特定字符串</li>
+<li>grep自带区分大小写功能</li>
+<li>代码 二维数据查找</li>
+<li>测试这个代码</li>
+<li>测试抖音的拍照上传功能</li>
+<li>设计一个抽奖系统</li>
+</ol>
+<h3 id="字节三面"><a href="#字节三面" class="headerlink" title="字节三面"></a>字节三面</h3><ol>
+<li>代码 找数组中和为特定值的两个数</li>
+<li>优化</li>
+<li>测试你的代码</li>
+<li>最有成长性的项目</li>
+<li>为什么</li>
+<li>遇到了什么困难</li>
+<li>认为合作的时候应该怎么样</li>
+<li>如果做你之前工作的人很慢你怎么办</li>
+<li>测试微信收发消息</li>
+<li>抖音的好的地方</li>
+<li>为什么不怎么用抖音</li>
+<li>平时用什么其他的APP</li>
+<li>问了一下关于B站（其实我不咋用）</li>
+<li>对测试的理解</li>
+<li>对测试准备了哪些东西</li>
+<li>英语怎么样</li>
+<li>可以实习的时间</li>
+</ol>
+<h3 id="HR"><a href="#HR" class="headerlink" title="HR"></a>HR</h3><p>我的HR面就核对了一下工作时间和大概的工作内容。没有别人面经上说的问的那么多。我问她，接到电话是不是就一定录取了，她说是。</p>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>　　相比百度那边的面试，能加到HR的微信，有一个可以问进度人，就会好一些。<br>　　我同学是字节提前批，他说他面试基本上跟面经上写的一模一样。我正式批，看了很多面经，感觉，不太一样吧，没有他说的那么简单啦。<br>　　字节对项目也问的很细，相比起来百度那边就随便问了问，字节这边会沿着你的项目往里深挖，所以自己做过的项目得真的弄懂。</p>
+<h2 id="关于测开"><a href="#关于测开" class="headerlink" title="关于测开"></a>关于测开</h2><p>　　我是接了字节HR电话才知道，字节这边的测开（印象中他好像说百度也是）是其他公司的研发岗，测试是其他公司的测开岗，他们的纯测试外包给了别人。所以在准备面试的时候，还得去查查该公司职位的具体对应的工作，不然就很尴尬。<br>　　面试官那边推荐在校想做测开的可以去多看看国外IT公司写的测开的书，比如谷歌的《Goole软件测试之道》等等。<br>　　像面试中会被问到计网、操作系统、数据库、linux、程序设计等，得准备起来。背起来还挺快的。<br>　　反正就莫名其妙就做了测开吧。祝大家早日上岸。</p>
+]]></content>
+  </entry>
+</search>
